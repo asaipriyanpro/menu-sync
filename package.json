@@ -1,0 +1,16 @@
+{
+  "name": "menusync-preflight-check",
+  "scripts": {
+    "start": "ts-node ./src/index.ts",
+    "test": "ts-node ./src/lib/testing.ts"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "morphism": "^1.12.3",
+    "ramda": "^0.28.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "ts-node": "^10.9.1"
+  }
+}

@@ -1,0 +1,90 @@
+{
+  "categories": [
+    {
+      "id": "202221",
+      "name": "Rice ",
+      "second_language": "ভাত",
+      "tax_percentage": 5,
+      "schedule": {
+        "start_date": "2023-03-01T",
+        "end_date": "2023-12-29",
+        "time_period": {
+          "start": "00:00:00",
+          "end": "00:00:00"
+        }
+      },
+      "subcategories": ["202201", "202202"]
+    }
+  ],
+  "subcategories": [
+    {
+      "id": "202201",
+      "name": "Veg Cat",
+      "description": "Verify the MenuSync",
+      "second_language": "ভেজি মেকুৰী",
+      "items": ["302221"]
+    },
+    {
+      "id": "202202",
+      "name": "NonVeg Cat",
+      "description": "Verify the MenuSync",
+      "second_language": "ননভেগ মেকুৰী",
+      "items": ["302222"]
+    }
+  ],
+  "items": [
+    {
+      "id": "302221",
+      "name": "Fried Rice",
+      "description": "check the image",
+      "second_language": "ননভেগ মেকুৰী",
+      "price": 4500,
+      "modifier_groups": ["201", "203"]
+    },
+    {
+      "id": "302222",
+      "name": "Panner Fried Rice",
+      "description": "",
+      "second_language": "ননভেগ মেকুৰী",
+      "price": 4000,
+      "modifier_groups": ["202"]
+    }
+  ],
+  "modifier_groups": [
+    {
+      "id": "201",
+      "name": "Cucumber",
+      "description": "Please select One",
+      "second_language": "ননভেগ মেকুৰী",
+      "modifiers": ["111", "222"]
+    },
+    {
+      "id": "202",
+      "name": "Brocoli ",
+      "description": "Please select Two",
+      "second_language": "ননভেগ মেকুৰী",
+      "modifiers": ["111", "222"]
+    },
+    {
+      "id": "203",
+      "name": "corn ",
+      "description": "Please select Two",
+      "second_language": "ননভেগ মেকুৰী",
+      "modifiers": ["111", "222"]
+    }
+  ],
+  "modifiers": [
+    {
+      "id": "111",
+      "name": "Cucumber Addon1",
+      "price": 300,
+      "second_language": "ননভেগ মেকুৰী"
+    },
+    {
+      "id": "222",
+      "name": "Cucumber Addon2",
+      "price": 800,
+      "second_language": "ননভেগ মেকুৰী"
+    }
+  ]
+}

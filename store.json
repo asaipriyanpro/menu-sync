@@ -1,0 +1,170 @@
+[
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-14T00:00:00.000Z",
+    "day": "sunday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-14T00:00:00.000Z",
+    "day": "sunday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-15T00:00:00.000Z",
+    "day": "monday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-15T00:00:00.000Z",
+    "day": "monday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-16T00:00:00.000Z",
+    "day": "tuesday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-16T00:00:00.000Z",
+    "day": "tuesday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-17T00:00:00.000Z",
+    "day": "wednesday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-18T00:00:00.000Z",
+    "day": "thursday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-19T00:00:00.000Z",
+    "day": "friday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-19T00:00:00.000Z",
+    "day": "friday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-20T00:00:00.000Z",
+    "day": "saturday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "collection",
+    "business_date": "2023-05-20T00:00:00.000Z",
+    "day": "saturday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-14T00:00:00.000Z",
+    "day": "sunday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-14T00:00:00.000Z",
+    "day": "sunday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-15T00:00:00.000Z",
+    "day": "monday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-15T00:00:00.000Z",
+    "day": "monday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-16T00:00:00.000Z",
+    "day": "tuesday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-16T00:00:00.000Z",
+    "day": "tuesday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-17T00:00:00.000Z",
+    "day": "wednesday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-18T00:00:00.000Z",
+    "day": "thursday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-19T00:00:00.000Z",
+    "day": "friday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-19T00:00:00.000Z",
+    "day": "friday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-20T00:00:00.000Z",
+    "day": "saturday",
+    "open_at": "05:00",
+    "close_at": "23:59"
+  },
+  {
+    "service_type": "delivery",
+    "business_date": "2023-05-20T00:00:00.000Z",
+    "day": "saturday",
+    "open_at": "00:01",
+    "close_at": "04:59"
+  }
+]
