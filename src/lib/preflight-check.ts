@@ -48,7 +48,6 @@ const referenceValuePresent = (value: number | string): boolean => {
  * Currently it simply logs a warning - but it could be altered to send a message to Cliq etc.
  */
 const logPreflightFailure = (message: string, errorList: string[]) => {
-  console.warn(message);
   errorList.push(message);
 };
 

@@ -149,12 +149,6 @@ interface UrbanPiperCharge {
 }
 
 interface UrbanPiperPayload {
-  flush_categories: boolean;
-  flush_items: boolean;
-  flush_option_groups: boolean;
-  flush_options: boolean;
-  flush_taxes: boolean;
-  flush_charges: boolean;
   categories: UrbanPiperCategory[];
   items: UrbanPiperItem[];
   option_groups: UrbanPiperOptionGroup[];

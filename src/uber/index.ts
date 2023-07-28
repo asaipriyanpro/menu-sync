@@ -191,7 +191,7 @@ export const UberMenuSync = (categories, addons) => {
     addons,
     store,
     storeAvailability,
-    priceHikePercent: 10,
+    priceHikePercent: 15,
   };
 
   /**
@@ -206,8 +206,6 @@ export const UberMenuSync = (categories, addons) => {
     menuType: "collection",
     ...menuArgs,
   });
-
-  
 
   return deliveryMenu;
 };

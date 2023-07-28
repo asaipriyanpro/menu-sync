@@ -22,7 +22,7 @@ const URLs = {
 const performCheck = async (storeId) => {
   const itemUrl = `${URLs.prod}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
   const addonUrl = `${URLs.prod}/api/consumer/store/${storeId}/addons/all.json`;
-  const addoV2Url = `${URLs.prod}/api/consumer/store/${storeId}/addons/all_V2.json`;
+  const addoV2Url = `${URLs.prod}/api/consumer/store/${storeId}/addons/v3/all.json`;
 
   const itemFileContent = await get(itemUrl, {});
   const addonFileContent = await get(addonUrl, {});
@@ -40,18 +40,19 @@ const performCheck = async (storeId) => {
 
   createFile("category.json", categories, 8023);
   createFile("addons.json", addons, 8023);
+
   const preflight = performPreflightCheck(storeId, categories, addons);
-  // if (preflight.failedAddonCatIds.length) {
-  //   const output = [...new Set(preflight.failedAddonCatIds)];
-  //   console.log(output);
-  //   categories = removeFailedItems(categories, output);
-  //   addons = removeFailedAddonsCats(addons, output);
-  //   // createFile("removed_cat.json", categories);
-  //   // createFile("removed_addon.json", addons);
-  // }
-  if (false) {
-    // const uber = UberMenuSync(categories, addons);
-    // createFile("uber.json", uber, storeId);
+  addons = removeAddons(addons);
+  if (preflight.failedAddonCatIds.length) {
+    const output = [...new Set(preflight.failedAddonCatIds)];
+    categories = removeFailedItems(categories, output);
+    addons = removeFailedAddonsCats(addons, output);
+    // createFile("removed_cat.json", categories);
+    // createFile("removed_addon.json", addons);
+  }
+  if (true) {
+    const uber = UberMenuSync(categories, addons);
+    createFile("uber.json", uber, storeId);
     return;
   }
 
@@ -93,12 +94,15 @@ const performCheck = async (storeId) => {
   createFile("payload.json", payload, storeId);
 
   const ITEMS_PER_PAGE = 1000;
-  //const splitPages = splitPayloads(payload, ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+  const splitPages = splitPayloads(payload, ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+  splitPages.map((x, i) => {
+    createFile(`${storeId}_${i + 1}.json`, x, storeId);
+  });
 };
 
 const checkBatch = async () => {
-  //797514
-  let items = [{ name: "Store 1", storeId: "867570" }];
+  //794608
+  let items = [{ name: "Store 1", storeId: "833539" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);
@@ -120,7 +124,7 @@ const checkBatch = async () => {
 
 checkBatch();
 
-const createFile = (fileName, data, storeId) => {
+export const createFile = (fileName, data, storeId) => {
   fs.writeFile(fileName, JSON.stringify(data), (err) => {
     if (err) throw err;
     console.log(`file created ${storeId}`);

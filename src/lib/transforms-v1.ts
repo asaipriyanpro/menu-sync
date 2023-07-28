@@ -6,6 +6,7 @@ import {
   UrbanPiperPayload,
 } from "./types";
 import { calculatePrice, suitableDietToUPFoodType } from "./utils";
+import { createFile } from "../index";
 
 /**
  * UP seem to have a 'truthy' bug in their update code
@@ -21,12 +22,6 @@ export const transformMenuToUrbanPiperPayload = (
   baseIncreasePercentage: number
 ): UrbanPiperPayload => {
   return {
-    flush_categories: true,
-    flush_items: true,
-    flush_option_groups: true,
-    flush_options: true,
-    flush_taxes: true,
-    flush_charges: true,
     categories: getCategories(categories),
     items: getItems(categories, baseIncreasePercentage),
     option_groups: getOptionGroups(categories, addons),
@@ -45,25 +40,43 @@ const getChildGroupsForAddon = (addon: any, addons: any): string[] => {
       addon.next_move,
       ...resolveNextMoves(addon.next_move, addons),
     ];
-    console.log(internalIds);
-    return internalIds.map(
-      (internalId) => `modifier:${addon.id}##mod-group:${internalId}`
-    );
+    return internalIds.map((internalId) => `mod-group:${internalId}`);
   } else {
     return [];
   }
+};
+
+const joinNestedModifierIds = (addons: any) => {
+  const result = {};
+  const value = [];
+  Object.values(addons).forEach((addonMap: any) => {
+    addonMap.addon.forEach((addon) => {
+      if (addon.next_move) {
+        addons[addon.next_move].addon.forEach((mod) => {
+          value.push(`modifier:${addon.id}##modifier:${mod.id}`);
+          result[
+            `modifier:${mod.id}`
+          ] = `modifier:${addon.id}##modifier:${mod.id}`;
+        });
+      }
+    });
+  });
+  createFile("modifier.json", value, 2929);
+  return result;
 };
 
 const getOptions = (
   addons: any,
   baseIncreasePercentage?: number
 ): UrbanPiperOption[] => {
+  const nestedModiferIds = joinNestedModifierIds(addons);
   return Object.values(addons)
     .map((addonMap: any) =>
       addonMap.addon.map(
         (addon: any): UrbanPiperOption => ({
-          ref_id: `modifier:${addon.id}`,
-          title: addon.name,
+          ref_id:
+            nestedModiferIds[`modifier:${addon.id}`] || `modifier:${addon.id}`,
+          title: `${addon.name} ${addon.second_language_name || ""}`.trim(),
           available: addon.show_online === 1,
           description: "",
           food_type: suitableDietToUPFoodType(addon.suitable_diet),
@@ -150,7 +163,7 @@ const getOptionGroups = (
   return Object.values(addons).map(({ category, addon }: any) => {
     return {
       ref_id: `mod-group:${category.id}`,
-      title: category.name,
+      title: `${category.name} ${category.second_language_name || ""}`.trim(),
       description: category.description,
       sort_order: SORT_ORDER_OFFSET + category.pos,
       ref_title: category.name,
@@ -172,7 +185,7 @@ const getCategories = (categories: any[]) =>
       return [
         {
           ref_id: `cat:${cat.id}`,
-          name: cat.name,
+          name: `${cat.name} ${cat.second_language_name || ""}`.trim(),
           description: "",
           img_url: cat.image,
           active: cat.show_online > 0,
@@ -180,7 +193,7 @@ const getCategories = (categories: any[]) =>
         },
         ...cat.subcat.map((subcat: any) => ({
           ref_id: `subcat:${subcat.id}`,
-          name: subcat.name,
+          name: `${subcat.name} ${subcat.second_language_name || ""}`.trim(),
           description: subcat.description,
           img_url: cat.image,
           active: subcat.show_online > 0,
@@ -200,7 +213,7 @@ const getItems = (categories: any[], baseIncreasePercentage?: number) =>
         subcat.item.map(
           (item: any): UrbanPiperItem => ({
             ref_id: `item:${item.id}`,
-            title: item.name,
+            title: `${item.name} ${item.second_language_name || ""}`.trim(),
             description: item.description,
             category_ref_ids: [`subcat:${item.subcat}`],
             price: calculatePrice({

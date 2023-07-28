@@ -18,14 +18,8 @@ const splitItemPayloads = (
     fullPayload.items,
     pageSize
   ).map(
-    (pageOfItems, index) =>
+    (pageOfItems) =>
       ({
-        flush_categories: false,
-        flush_items: index === 0, // First page is a flush_items=true, other pages are false
-        flush_option_groups: false,
-        flush_options: false,
-        flush_taxes: false,
-        flush_charges: false,
         categories: fullPayload.categories,
         items: pageOfItems,
         option_groups: [],
@@ -46,14 +40,8 @@ const splitOptionPayloads = (
     fullPayload.options,
     pageSize
   ).map(
-    (pageOfOptions, index) =>
+    (pageOfOptions) =>
       ({
-        flush_categories: false,
-        flush_items: false,
-        flush_option_groups: false,
-        flush_options: index === 0, // First page is a flush_items=true, other pages are false
-        flush_taxes: false,
-        flush_charges: false,
         categories: [],
         items: [],
         option_groups: fullPayload.option_groups,
