@@ -46,36 +46,15 @@ const getChildGroupsForAddon = (addon: any, addons: any): string[] => {
   }
 };
 
-const joinNestedModifierIds = (addons: any) => {
-  const result = {};
-  const value = [];
-  Object.values(addons).forEach((addonMap: any) => {
-    addonMap.addon.forEach((addon) => {
-      if (addon.next_move) {
-        addons[addon.next_move].addon.forEach((mod) => {
-          value.push(`modifier:${addon.id}##modifier:${mod.id}`);
-          result[
-            `modifier:${mod.id}`
-          ] = `modifier:${addon.id}##modifier:${mod.id}`;
-        });
-      }
-    });
-  });
-  createFile("modifier.json", value, 2929);
-  return result;
-};
-
 const getOptions = (
   addons: any,
   baseIncreasePercentage?: number
 ): UrbanPiperOption[] => {
-  const nestedModiferIds = joinNestedModifierIds(addons);
   return Object.values(addons)
     .map((addonMap: any) =>
       addonMap.addon.map(
         (addon: any): UrbanPiperOption => ({
-          ref_id:
-            nestedModiferIds[`modifier:${addon.id}`] || `modifier:${addon.id}`,
+          ref_id: `modifier:${addon.id}`,
           title: `${addon.name} ${addon.second_language_name || ""}`.trim(),
           available: addon.show_online === 1,
           description: "",
@@ -240,3 +219,47 @@ const getItems = (categories: any[], baseIncreasePercentage?: number) =>
     )
     .flat()
     .flat();
+
+const joinNestedModifierIds = (addons: any) => {
+  const result = [];
+  Object.values(addons).forEach((addonMap: any) => {
+    addonMap.addon.forEach((addon) => {
+      if (addon.next_move) {
+        addons[addon.next_move].addon.forEach((mod) => {
+          result.push(`modifier:${addon.id}##modifier:${mod.id}`);
+        });
+      }
+    });
+  });
+  return result;
+};
+
+export const convertCombinedModifiers = (
+  modifiers: UrbanPiperOption[],
+  addons: any[]
+) => {
+  const duplicateModifiers = [];
+  const nestedModifierIds = [];
+  const combinedModifiers = joinNestedModifierIds(addons);
+
+  combinedModifiers.forEach((combinedId) => {
+    const [modifierId, nestedGroupId] = combinedId.split("##");
+    const originalModifier = modifiers.find(
+      (mod) => mod.ref_id === nestedGroupId
+    );
+
+    if (!nestedModifierIds.includes(nestedGroupId)) {
+      nestedModifierIds.push(nestedGroupId);
+    }
+    if (originalModifier) {
+      const duplicateMod = { ...originalModifier };
+      duplicateMod.ref_id = `${modifierId}##${nestedGroupId}`;
+      duplicateModifiers.push(duplicateMod);
+    }
+  });
+  const filteredModifier = modifiers.filter(
+    (mod) => !nestedModifierIds.includes(mod.ref_id)
+  );
+
+  return [...filteredModifier, ...duplicateModifiers];
+};

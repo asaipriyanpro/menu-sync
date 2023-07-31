@@ -7,7 +7,10 @@ import {
   removeAddons,
 } from "./lib/preflight-check";
 import * as fs from "fs";
-import { transformMenuToUrbanPiperPayload } from "./lib/transforms-v1";
+import {
+  convertCombinedModifiers,
+  transformMenuToUrbanPiperPayload,
+} from "./lib/transforms-v1";
 import { splitPayloads } from "./lib/payloadSpliter";
 import { basicTransformer } from "../src/uber/uber";
 import { StoreAvailability, StoreInfo } from "./uber/type";
@@ -50,7 +53,7 @@ const performCheck = async (storeId) => {
     // createFile("removed_cat.json", categories);
     // createFile("removed_addon.json", addons);
   }
-  if (true) {
+  if (false) {
     const uber = UberMenuSync(categories, addons);
     createFile("uber.json", uber, storeId);
     return;
@@ -82,7 +85,12 @@ const performCheck = async (storeId) => {
   /**
    * Transform the menu into UrbanPiper format
    */
+
   const payload = transformMenuToUrbanPiperPayload(categories, addons, 15);
+  const modifiers = convertCombinedModifiers(payload.options, addons);
+  console.log({ modifiers: payload.options.length });
+  payload.options = modifiers;
+
   console.log({
     category: payload.categories.filter((x) => !x.ref_id.includes("subcat"))
       .length,
@@ -102,7 +110,7 @@ const performCheck = async (storeId) => {
 
 const checkBatch = async () => {
   //794608
-  let items = [{ name: "Store 1", storeId: "833539" }];
+  let items = [{ name: "Store 1", storeId: "130" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);
