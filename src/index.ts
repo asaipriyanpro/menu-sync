@@ -40,32 +40,32 @@ const performCheck = async (storeId) => {
   /**
    * Partner API menu
    */
-
   createFile("category.json", categories, 8023);
-  createFile("addons.json", addons, 8023);
+  createFile("addonsV2.json", addons, 8023);
 
-  const preflight = performPreflightCheck(storeId, categories, addons);
-  addons = removeAddons(addons);
-  if (preflight.failedAddonCatIds.length) {
-    const output = [...new Set(preflight.failedAddonCatIds)];
-    categories = removeFailedItems(categories, output);
-    addons = removeFailedAddonsCats(addons, output);
-    // createFile("removed_cat.json", categories);
-    // createFile("removed_addon.json", addons);
-  }
+  // const preflight = performPreflightCheck(storeId, categories, addons);
+  // addons = removeAddons(addons);
+  // if (preflight.failedAddonCatIds.length) {
+  //   const output = [...new Set(preflight.failedAddonCatIds)];
+  //   categories = removeFailedItems(categories, output);
+  //   addons = removeFailedAddonsCats(addons, output);
+  //   // createFile("removed_cat.json", categories);
+  //   // createFile("removed_addon.json", addons);
+  // }
   if (false) {
     const uber = UberMenuSync(categories, addons);
     createFile("uber.json", uber, storeId);
     return;
   }
 
-  if (false) {
+  if (true) {
     if (!fs.existsSync(`stores/${storeId}`)) {
       fs.mkdirSync(`stores/${storeId}`);
     }
     createFile(`stores/${storeId}/categories.json`, categories, storeId);
-    addons && createFile(`stores/${storeId}/addons.json`, addons, storeId);
+    //  addons && createFile(`stores/${storeId}/addons.json`, addons, storeId);
     addonsV2 && createFile(`stores/${storeId}/addonV2.json`, addonsV2, storeId);
+    console.log("jghjgjhg");
     const result = partnerAPIMenu(categories, addons, addonsV2);
     createFile(`stores/${storeId}/partner_api.json`, result, storeId);
     return;
@@ -87,9 +87,11 @@ const performCheck = async (storeId) => {
    */
 
   const payload = transformMenuToUrbanPiperPayload(categories, addons, 15);
-  const modifiers = convertCombinedModifiers(payload.options, addons);
-  console.log({ modifiers: payload.options.length });
-  payload.options = modifiers;
+  if (true) {
+    const modifiers = convertCombinedModifiers(payload.options, addons);
+    console.log({ modifiers: payload.options.length });
+    payload.options = modifiers;
+  }
 
   console.log({
     category: payload.categories.filter((x) => !x.ref_id.includes("subcat"))
@@ -110,7 +112,7 @@ const performCheck = async (storeId) => {
 
 const checkBatch = async () => {
   //794608
-  let items = [{ name: "Store 1", storeId: "130" }];
+  let items = [{ name: "Store 1", storeId: "6317" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);

@@ -180,6 +180,8 @@ export interface FoodhubAddonCategoryMapCategory {
   free_count: number;
   region_tax_id: number | null;
   next_moves: string[];
+  minimum: number;
+  maximum: number;
 }
 
 export interface FoodhubAddon {
@@ -188,7 +190,7 @@ export interface FoodhubAddon {
   host: string;
   item_addon_cat: number;
   name: string;
-  type: "RADIO" | "MULTI";
+  type: "radio" | "multi";
   price: string;
   background_color: string;
   font_color: string;

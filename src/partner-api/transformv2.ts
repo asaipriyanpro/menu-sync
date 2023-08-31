@@ -183,6 +183,22 @@ const transform: Schema<MenuEntity, FoodHubMenu> = {
         id: String(category.partner_id || category.id),
         name: category.name,
         description: category.description,
+        min_permitted:
+          category.minimum ??
+          (category.next_moves.length > 0 &&
+          addons.addon
+            .find((x) => x.id === Number(category.next_moves[0]))
+            ?.type.toLowerCase() === "radio"
+            ? 1
+            : 0),
+        max_permitted:
+          category.maximum ??
+          (category.next_moves.length > 0 &&
+          addons.addon
+            .find((x) => x.id === Number(category.next_moves[0]))
+            ?.type.toLowerCase() == "multi"
+            ? 0
+            : undefined),
         modifiers: category.next_moves?.map((x) =>
           addons.addon
             ? addons.addon.find((don) => don.id === Number(x))?.partner_id || x
@@ -207,8 +223,8 @@ const transform: Schema<MenuEntity, FoodHubMenu> = {
       tax_percentage:
         don.tax_percentage !== null ? Number(don.tax_percentage) : undefined,
       is_tax_included: !(don.tax_percentage && don.tax_percentage > 0),
-      min_permitted: don.type === "RADIO" ? 1 : 0,
-      max_permitted: don.type === "MULTI" ? 0 : undefined,
+      min_permitted: don.type === "radio" ? 1 : 0,
+      max_permitted: don.type === "multi" ? 0 : undefined,
       dietary_labels: don.suitable_diet
         ? JSON.parse(don.suitable_diet)
         : undefined,

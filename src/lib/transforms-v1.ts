@@ -7,6 +7,7 @@ import {
 } from "./types";
 import { calculatePrice, suitableDietToUPFoodType } from "./utils";
 import { createFile } from "../index";
+import { FoodhubAddon } from "../uber/type";
 
 /**
  * UP seem to have a 'truthy' bug in their update code
@@ -220,18 +221,40 @@ const getItems = (categories: any[], baseIncreasePercentage?: number) =>
     .flat()
     .flat();
 
-const joinNestedModifierIds = (addons: any) => {
-  const result = [];
-  Object.values(addons).forEach((addonMap: any) => {
-    addonMap.addon.forEach((addon) => {
+const nestedModiferDuplicate = (addons) => {
+  let modifiers = [];
+  Object.values(addons).map((addonMap: any) => {
+    addonMap.addon?.map((addon: any) => {
       if (addon.next_move) {
-        addons[addon.next_move].addon.forEach((mod) => {
-          result.push(`modifier:${addon.id}##modifier:${mod.id}`);
-        });
+        const group = addons[addon.next_move];
+        maxDepthNestedModifer(addon, group, addons, modifiers);
       }
     });
   });
-  return result;
+  modifiers = [...new Set(modifiers)];
+  createFile("modifiers.json", modifiers, 121212);
+  return modifiers;
+};
+
+const maxDepthNestedModifer = (
+  topAddon: any,
+  addonCat: any,
+  addonData: any,
+  modifiers: any[]
+) => {
+  if (addonCat.addon) {
+    for (let addon of addonCat.addon) {
+      modifiers.push(`modifier:${topAddon.id}##modifier:${addon.id}`);
+      if (addon.next_move) {
+        const addonNextMove = addonData[addon.next_move];
+        maxDepthNestedModifer(topAddon, addonNextMove, addonData, modifiers);
+      }
+    }
+  }
+  if (addonCat.category.next_move) {
+    const addonCatNextMove = addonData[addonCat.category.next_move];
+    maxDepthNestedModifer(topAddon, addonCatNextMove, addonData, modifiers);
+  }
 };
 
 export const convertCombinedModifiers = (
@@ -240,7 +263,7 @@ export const convertCombinedModifiers = (
 ) => {
   const duplicateModifiers = [];
   const nestedModifierIds = [];
-  const combinedModifiers = joinNestedModifierIds(addons);
+  const combinedModifiers = nestedModiferDuplicate(addons);
 
   combinedModifiers.forEach((combinedId) => {
     const [modifierId, nestedGroupId] = combinedId.split("##");

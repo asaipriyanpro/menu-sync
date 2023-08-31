@@ -234,12 +234,25 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
   modifier_groups: ({ addons }) =>
     (addons &&
       Object.keys(addons).map((categoryId) => {
+        const catAddons = addons[categoryId].addon;
+        const minimum = addons[categoryId].category.minimum;
+        const maximum = addons[categoryId].category.maximum;
         return {
           id: checkFalsyValues(addons[categoryId].category.partner_id)
             ? `mod-group:${categoryId}`
             : String(addons[categoryId].category.partner_id),
           name: addons[categoryId].category.name,
           description: addons[categoryId].category.description,
+          min_permitted:
+            minimum ??
+            (catAddons.length > 0 && catAddons[0].type.toLowerCase() === "radio"
+              ? 1
+              : 0),
+          max_permitted:
+            maximum ??
+            (catAddons.length > 0 && catAddons[0].type.toLowerCase() === "multi"
+              ? 0
+              : undefined),
           modifiers:
             addons[categoryId].addon.map((item) =>
               checkFalsyValues(item.partner_id)
@@ -274,8 +287,8 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                   ? Number(don.tax_percentage)
                   : undefined,
               is_tax_included: !(don.tax_percentage && don.tax_percentage > 0),
-              min_permitted: don.type === "RADIO" ? 1 : 0,
-              max_permitted: don.type === "MULTI" ? 0 : undefined,
+              min_permitted: don.type === "radio" ? 1 : 0,
+              max_permitted: don.type === "multi" ? 0 : undefined,
               dietary_labels: don.suitable_diet
                 ? JSON.parse(don.suitable_diet)
                 : undefined,
