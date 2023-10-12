@@ -244,15 +244,13 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
           name: addons[categoryId].category.name,
           description: addons[categoryId].category.description,
           min_permitted:
-            minimum ??
-            (catAddons.length > 0 && catAddons[0].type.toLowerCase() === "radio"
+            catAddons.length > 0 && catAddons[0].type.toLowerCase() === "radio"
               ? 1
-              : 0),
+              : 0,
           max_permitted:
-            maximum ??
-            (catAddons.length > 0 && catAddons[0].type.toLowerCase() === "multi"
+            catAddons.length > 0 && catAddons[0].type.toLowerCase() === "multi"
               ? 0
-              : undefined),
+              : undefined,
           modifiers:
             addons[categoryId].addon.map((item) =>
               checkFalsyValues(item.partner_id)
@@ -287,8 +285,8 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                   ? Number(don.tax_percentage)
                   : undefined,
               is_tax_included: !(don.tax_percentage && don.tax_percentage > 0),
-              min_permitted: don.type === "radio" ? 1 : 0,
-              max_permitted: don.type === "multi" ? 0 : undefined,
+              min_permitted: don.type.toLowerCase() === "radio" ? 1 : 0,
+              max_permitted: don.type.toLowerCase() === "multi" ? 0 : undefined,
               dietary_labels: don.suitable_diet
                 ? JSON.parse(don.suitable_diet)
                 : undefined,

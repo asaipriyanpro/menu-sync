@@ -16,6 +16,7 @@ import { basicTransformer } from "../src/uber/uber";
 import { StoreAvailability, StoreInfo } from "./uber/type";
 import { partnerAPIMenu } from "./partner-api/index";
 import { UberMenuSync } from "./uber/index";
+import { deliverooMenu } from "./deliveroo/index";
 
 const URLs = {
   prod: "https://foodhub.co.uk",
@@ -23,9 +24,9 @@ const URLs = {
 };
 
 const performCheck = async (storeId) => {
-  const itemUrl = `${URLs.prod}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
-  const addonUrl = `${URLs.prod}/api/consumer/store/${storeId}/addons/all.json`;
-  const addoV2Url = `${URLs.prod}/api/consumer/store/${storeId}/addons/v3/all.json`;
+  const itemUrl = `${URLs.sit}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
+  const addonUrl = `${URLs.sit}/api/consumer/store/${storeId}/addons/all.json`;
+  const addoV2Url = `${URLs.sit}/api/consumer/store/${storeId}/addons/v3/all.json`;
 
   const itemFileContent = await get(itemUrl, {});
   const addonFileContent = await get(addonUrl, {});
@@ -33,39 +34,51 @@ const performCheck = async (storeId) => {
 
   let categories = resolve(itemFileContent.data.data[0])?.data;
 
-  let addons = resolve(addonFileContent.data.data[0])?.data;
+  let addons = resolve(addonFileContent.data.data[0])?.data || {};
 
   let addonsV2 = resolve(addonV2FileContent.data.data[0])?.data;
 
   /**
    * Partner API menu
    */
-  createFile("category.json", categories, 8023);
-  createFile("addonsV2.json", addons, 8023);
 
-  // const preflight = performPreflightCheck(storeId, categories, addons);
+  createFile("category.json", categories, 8050565);
+  createFile("addonsv1.json", addons, 8050565);
+
+  if (true) {
+    const menu = deliverooMenu(categories, addons);
+    const { items, mealtimes, modifiers } = menu.menu;
+    console.log({
+      items: items.length,
+      mealtimes: mealtimes.length,
+      modifiers: modifiers.length,
+    });
+    createFile("deliveroo-menu.json", menu, storeId);
+  }
+
+  const preflight = performPreflightCheck(storeId, categories, addons);
   // addons = removeAddons(addons);
-  // if (preflight.failedAddonCatIds.length) {
-  //   const output = [...new Set(preflight.failedAddonCatIds)];
-  //   categories = removeFailedItems(categories, output);
-  //   addons = removeFailedAddonsCats(addons, output);
-  //   // createFile("removed_cat.json", categories);
-  //   // createFile("removed_addon.json", addons);
-  // }
+  if (preflight.failedAddonCatIds.length) {
+    //   const output = [...new Set(preflight.failedAddonCatIds)];
+    //   categories = removeFailedItems(categories, output);
+    //   addons = removeFailedAddonsCats(addons, output);
+    //   // createFile("removed_cat.json", categories);
+    //   // createFile("removed_addon.json", addons);
+    return;
+  }
   if (false) {
     const uber = UberMenuSync(categories, addons);
     createFile("uber.json", uber, storeId);
     return;
   }
 
-  if (true) {
+  if (false) {
     if (!fs.existsSync(`stores/${storeId}`)) {
       fs.mkdirSync(`stores/${storeId}`);
     }
     createFile(`stores/${storeId}/categories.json`, categories, storeId);
-    //  addons && createFile(`stores/${storeId}/addons.json`, addons, storeId);
-    addonsV2 && createFile(`stores/${storeId}/addonV2.json`, addonsV2, storeId);
-    console.log("jghjgjhg");
+    addons && createFile(`stores/${storeId}/addons.json`, addons, storeId);
+    // addonsV2 && createFile(`stores/${storeId}/addonV2.json`, addonsV2, storeId);
     const result = partnerAPIMenu(categories, addons, addonsV2);
     createFile(`stores/${storeId}/partner_api.json`, result, storeId);
     return;
@@ -112,7 +125,7 @@ const performCheck = async (storeId) => {
 
 const checkBatch = async () => {
   //794608
-  let items = [{ name: "Store 1", storeId: "6317" }];
+  let items = [{ name: "Store 1", storeId: "8050558" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);

@@ -5,6 +5,7 @@ interface Item {
   id: number;
   name: string;
   item_addon_cat: string;
+  offer: string;
 }
 interface ItemSubcategory {
   item: Item[];
@@ -196,6 +197,12 @@ export const performPreflightCheck = (
   for (const itemCategory of itemCategoriesList) {
     for (const itemSubcategory of itemCategory.subcat) {
       for (const item of itemSubcategory.item) {
+        if (item.offer === "BOGOF" || item.offer === "BOGOH") {
+          logPreflightFailure(
+            `${errorPrefix} storeId: ${storeId} -  item id: ${item.id} (${item.name}) ${item.offer} detected this item.`,
+            errorList
+          );
+        }
         if (referenceValuePresent(item.item_addon_cat)) {
           const rootAddonCat = mapOfAddonCategories
             ? mapOfAddonCategories[item.item_addon_cat]
