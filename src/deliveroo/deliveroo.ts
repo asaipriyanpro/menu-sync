@@ -7,6 +7,7 @@ import {
   FHAddonCategoryMap,
   FHItem,
   FoodhubCagtegory,
+  NutritionalInfo,
   Schedule,
   StoreAvailability,
   StoreInfo,
@@ -37,26 +38,30 @@ const getMealTimes = (
   store: StoreInfo,
   storeAvailability: StoreAvailability[]
 ): DeliverooMealtimes[] => {
-  return [
-    {
-      id: `store:${store.id}`,
-      name: {
-        en: store.name,
-      },
-      description: {
-        en: store.description,
-      },
-      image: {
-        url: store.logo_url,
-      },
-      schedule: serviceAvailability(storeAvailability),
-      category_ids: categories
-        .map((category) =>
-          category.subcat.map((subcat) => toId(subcat.id, "fh_category"))
-        )
-        .flat(),
+  const availablity = [];
+  const delivery = serviceAvailability(storeAvailability, "delivery");
+  const collection = serviceAvailability(storeAvailability, "collection");
+  delivery.length && availablity.push(delivery);
+  collection.length && availablity.push(collection);
+
+  return availablity.map((schedule) => ({
+    id: `store:${store.id}`,
+    name: {
+      en: store.name,
     },
-  ];
+    description: {
+      en: store.description,
+    },
+    image: {
+      url: store.logo_url,
+    },
+    schedule: [],
+    category_ids: categories
+      .map((category) =>
+        category.subcat.map((subcat) => toId(subcat.id, "fh_category"))
+      )
+      .flat(),
+  }));
 };
 const getCategories = (
   categories: FoodhubCagtegory[]
@@ -98,6 +103,7 @@ const getItems = (
         image: {
           url: item.aws_image || item.image,
         },
+        nutritional_info: nutritionalInfo(item.nutrition),
         plu: toId(item.id, "fh_item"),
         contains_alcohol: false,
         modifier_ids:
@@ -150,13 +156,17 @@ const getModifier = (addons: FHAddonCategoryMap): DeliverooModifiers[] =>
       name: {
         en: category.name,
       },
+      min_selection: addon.length > 0 && addon[0].type === "radio" ? 1 : 0,
+      max_selection:
+        addon.length > 0 && addon[0].type === "radio" ? 1 : addon.length,
       item_ids: addon.map(({ id }) => toId(id, "fh_addon")),
     })
   );
 
 // Store open and close availablity collect
 const serviceAvailability = (
-  serviceAvailable: StoreAvailability[]
+  serviceAvailable: StoreAvailability[],
+  type: "delivery" | "collection"
 ): Schedule[] => {
   const days = {
     monday: 0,
@@ -170,7 +180,7 @@ const serviceAvailability = (
   const result = [];
 
   for (let store of serviceAvailable) {
-    if (store.service_type === "delivery") {
+    if (store.service_type === type) {
       if (!result[days[store.day]]) {
         result[days[store.day]] = {
           day_of_week: days[store.day],
@@ -186,4 +196,21 @@ const serviceAvailability = (
   // Remove undefined elements in the result array
   const filteredResult = result.filter(Boolean);
   return filteredResult;
+};
+
+const nutritionalInfo = (nutrition: string): NutritionalInfo | {} => {
+  if (nutrition) {
+    const nutritionInfo = JSON.parse(nutrition);
+    if (nutritionInfo?.calories?.value) {
+      const value = nutritionInfo.calories.value.split("-");
+      return {
+        energy_kcal: {
+          low: Number(value[0]),
+          high: Number(value[1]),
+        },
+      };
+    }
+  }
+
+  return {};
 };

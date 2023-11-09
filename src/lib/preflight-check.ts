@@ -126,6 +126,9 @@ const markMaxDepth = (
 
   if (addonCat.addon) {
     for (const addon of addonCat.addon) {
+      if (addon.name.length > 120) {
+        console.log("addon", addon);
+      }
       if (referenceValuePresent(addon.next_move)) {
         const childCategory = addonData[addon.next_move];
 
@@ -197,6 +200,9 @@ export const performPreflightCheck = (
   for (const itemCategory of itemCategoriesList) {
     for (const itemSubcategory of itemCategory.subcat) {
       for (const item of itemSubcategory.item) {
+        if (item.name.length > 120) {
+          console.log("item", item);
+        }
         if (item.offer === "BOGOF" || item.offer === "BOGOH") {
           logPreflightFailure(
             `${errorPrefix} storeId: ${storeId} -  item id: ${item.id} (${item.name}) ${item.offer} detected this item.`,

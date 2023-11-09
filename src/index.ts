@@ -24,9 +24,9 @@ const URLs = {
 };
 
 const performCheck = async (storeId) => {
-  const itemUrl = `${URLs.sit}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
-  const addonUrl = `${URLs.sit}/api/consumer/store/${storeId}/addons/all.json`;
-  const addoV2Url = `${URLs.sit}/api/consumer/store/${storeId}/addons/v3/all.json`;
+  const itemUrl = `${URLs.prod}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
+  const addonUrl = `${URLs.prod}/api/consumer/store/${storeId}/addons/all.json`;
+  const addoV2Url = `${URLs.prod}/api/consumer/store/${storeId}/addons/v3/all.json`;
 
   const itemFileContent = await get(itemUrl, {});
   const addonFileContent = await get(addonUrl, {});
@@ -44,6 +44,10 @@ const performCheck = async (storeId) => {
 
   createFile("category.json", categories, 8050565);
   createFile("addonsv1.json", addons, 8050565);
+  const preflight = performPreflightCheck(storeId, categories, addons);
+  if (preflight.errorList.length) {
+    console.log(preflight.errorList);
+  }
 
   if (true) {
     const menu = deliverooMenu(categories, addons);
@@ -56,7 +60,6 @@ const performCheck = async (storeId) => {
     createFile("deliveroo-menu.json", menu, storeId);
   }
 
-  const preflight = performPreflightCheck(storeId, categories, addons);
   // addons = removeAddons(addons);
   if (preflight.failedAddonCatIds.length) {
     //   const output = [...new Set(preflight.failedAddonCatIds)];
@@ -125,7 +128,7 @@ const performCheck = async (storeId) => {
 
 const checkBatch = async () => {
   //794608
-  let items = [{ name: "Store 1", storeId: "8050558" }];
+  let items = [{ name: "Store 1", storeId: "831946" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);

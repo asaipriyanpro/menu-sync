@@ -327,7 +327,7 @@ export interface NutritionalInfo {
   energy_kcal: {
     low: number;
     high: number;
-    hfss: boolean;
+    hfss?: boolean;
   };
 }
 
@@ -351,7 +351,7 @@ export interface DeliverooItems {
   allergies?: string[];
   classifications?: string[];
   diets?: string[];
-  nutritional_info?: NutritionalInfo;
+  nutritional_info?: NutritionalInfo | {};
   contains_alcohol: boolean;
   max_quantity?: number | null;
   highlights?: string[];
