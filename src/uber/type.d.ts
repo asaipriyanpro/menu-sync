@@ -653,6 +653,7 @@ export interface FHItem {
   number_of_servings: string;
   nutrition: any;
   allergies: string[];
+  next_moves: string[];
 }
 
 export interface FoodhubAddonCategoryMapCategory {
@@ -672,6 +673,7 @@ export interface FoodhubAddonCategoryMapCategory {
   pos: number;
   free_count: number;
   region_tax_id: number | null;
+  next_moves: string[];
 }
 
 export interface FoodhubAddon {
@@ -696,6 +698,7 @@ export interface FoodhubAddon {
   is_print_label: string;
   region_tax_id: string | null;
   priceHikePercent: number;
+  next_moves: string[];
 }
 
 export interface FoodhubAddonCategoryMap {
@@ -705,10 +708,16 @@ export interface FoodhubAddonCategoryMap {
   };
 }
 
+export interface FoodhubAddonCategoryMapV3 {
+  categories: FoodhubAddonCategoryMapCategory[];
+  addons: FoodhubAddon[];
+}
+
 export interface FoodHubMenu {
   menuType: "delivery" | "collection";
   categories: FoodhubCagtegory[];
-  addons: FoodhubAddonCategoryMap;
+  addonsV1: FoodhubAddonCategoryMap;
+  addonsV3: FoodhubAddonCategoryMapV3;
   store: StoreInfo;
   storeAvailability: StoreAvailability[];
   priceHikePercent: number;

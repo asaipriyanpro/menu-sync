@@ -12,11 +12,11 @@ import {
   transformMenuToUrbanPiperPayload,
 } from "./lib/transforms-v1";
 import { splitPayloads } from "./lib/payloadSpliter";
-import { basicTransformer } from "../src/uber/uber";
 import { StoreAvailability, StoreInfo } from "./uber/type";
 import { partnerAPIMenu } from "./partner-api/index";
 import { UberMenuSync } from "./uber/index";
 import { deliverooMenu } from "./deliveroo/index";
+import { doordashMenu } from "./doordash";
 
 const URLs = {
   prod: "https://foodhub.co.uk",
@@ -24,9 +24,9 @@ const URLs = {
 };
 
 const performCheck = async (storeId) => {
-  const itemUrl = `${URLs.prod}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
-  const addonUrl = `${URLs.prod}/api/consumer/store/${storeId}/addons/all.json`;
-  const addoV2Url = `${URLs.prod}/api/consumer/store/${storeId}/addons/v3/all.json`;
+  const itemUrl = `${URLs.sit}/api/consumer/store/${storeId}/menu/foodhub/all.json`;
+  const addonUrl = `${URLs.sit}/api/consumer/store/${storeId}/addons/all.json`;
+  const addoV2Url = `${URLs.sit}/api/consumer/store/${storeId}/addons/v3/all.json`;
 
   const itemFileContent = await get(itemUrl, {});
   const addonFileContent = await get(addonUrl, {});
@@ -36,20 +36,19 @@ const performCheck = async (storeId) => {
 
   let addons = resolve(addonFileContent.data.data[0])?.data || {};
 
-  let addonsV2 = resolve(addonV2FileContent.data.data[0])?.data;
+  let addonsV3 = resolve(addonV2FileContent.data.data[0])?.data || {};
 
   /**
    * Partner API menu
    */
-
   createFile("category.json", categories, 8050565);
-  createFile("addonsv1.json", addons, 8050565);
+  createFile("addons.json", addonsV3, 8050565);
   const preflight = performPreflightCheck(storeId, categories, addons);
   if (preflight.errorList.length) {
-    console.log(preflight.errorList);
+    console.log("loop", preflight.errorList);
   }
 
-  if (true) {
+  if (false) {
     const menu = deliverooMenu(categories, addons);
     const { items, mealtimes, modifiers } = menu.menu;
     console.log({
@@ -58,6 +57,12 @@ const performCheck = async (storeId) => {
       modifiers: modifiers.length,
     });
     createFile("deliveroo-menu.json", menu, storeId);
+  }
+
+  if (true) {
+    console.log("commin");
+    const menu = doordashMenu(categories, addons);
+    createFile("doordash-menu.json", menu, storeId);
   }
 
   // addons = removeAddons(addons);
@@ -69,8 +74,8 @@ const performCheck = async (storeId) => {
     //   // createFile("removed_addon.json", addons);
     return;
   }
-  if (false) {
-    const uber = UberMenuSync(categories, addons);
+  if (true) {
+    const uber = UberMenuSync(categories, addons, addonsV3);
     createFile("uber.json", uber, storeId);
     return;
   }
@@ -82,7 +87,7 @@ const performCheck = async (storeId) => {
     createFile(`stores/${storeId}/categories.json`, categories, storeId);
     addons && createFile(`stores/${storeId}/addons.json`, addons, storeId);
     // addonsV2 && createFile(`stores/${storeId}/addonV2.json`, addonsV2, storeId);
-    const result = partnerAPIMenu(categories, addons, addonsV2);
+    const result = partnerAPIMenu(categories, addons, addonsV3);
     createFile(`stores/${storeId}/partner_api.json`, result, storeId);
     return;
   }
@@ -117,18 +122,18 @@ const performCheck = async (storeId) => {
     modifier: payload.options.length,
   });
 
-  createFile("payload.json", payload, storeId);
+  // createFile("payload.json", payload, storeId);
 
-  const ITEMS_PER_PAGE = 1000;
-  const splitPages = splitPayloads(payload, ITEMS_PER_PAGE, ITEMS_PER_PAGE);
-  splitPages.map((x, i) => {
-    createFile(`${storeId}_${i + 1}.json`, x, storeId);
-  });
+  // const ITEMS_PER_PAGE = 1000;
+  // const splitPages = splitPayloads(payload, ITEMS_PER_PAGE, ITEMS_PER_PAGE);
+  // splitPages.map((x, i) => {
+  //   createFile(`${storeId}_${i + 1}.json`, x, storeId);
+  // });
 };
 
 const checkBatch = async () => {
-  //794608
-  let items = [{ name: "Store 1", storeId: "831946" }];
+  //794608 801882 855659 8051218
+  let items = [{ name: "Store 1", storeId: "8051235" }];
   for (let data of items) {
     try {
       await performCheck(data.storeId);

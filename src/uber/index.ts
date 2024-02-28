@@ -1,7 +1,7 @@
 import { StoreAvailability, StoreInfo } from "./type";
 import { basicTransformer } from "./uber";
 
-export const UberMenuSync = (categories, addons) => {
+export const UberMenuSync = (categories, addonsV1, addonsV3) => {
   const storeAvailability: StoreAvailability[] = [
     {
       service_type: "collection",
@@ -188,7 +188,8 @@ export const UberMenuSync = (categories, addons) => {
 
   const menuArgs = {
     categories,
-    addons,
+    addonsV1,
+    addonsV3,
     store,
     storeAvailability,
     priceHikePercent: 15,
@@ -197,15 +198,21 @@ export const UberMenuSync = (categories, addons) => {
   /**
    * Generate a uber menu based on the menu and store details
    */
-  const deliveryMenu = basicTransformer({
-    menuType: "delivery",
-    ...menuArgs,
-  });
+  const deliveryMenu = basicTransformer(
+    {
+      menuType: "delivery",
+      ...menuArgs,
+    },
+    false
+  );
 
-  const collectionMenu = basicTransformer({
-    menuType: "collection",
-    ...menuArgs,
-  });
+  const collectionMenu = basicTransformer(
+    {
+      menuType: "collection",
+      ...menuArgs,
+    },
+    false
+  );
 
   return deliveryMenu;
 };

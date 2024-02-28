@@ -5,7 +5,6 @@ interface Item {
   id: number;
   name: string;
   item_addon_cat: string;
-  offer: string;
 }
 interface ItemSubcategory {
   item: Item[];
@@ -49,6 +48,7 @@ const referenceValuePresent = (value: number | string): boolean => {
  * Currently it simply logs a warning - but it could be altered to send a message to Cliq etc.
  */
 const logPreflightFailure = (message: string, errorList: string[]) => {
+  console.warn(message);
   errorList.push(message);
 };
 
@@ -126,9 +126,6 @@ const markMaxDepth = (
 
   if (addonCat.addon) {
     for (const addon of addonCat.addon) {
-      if (addon.name.length > 120) {
-        console.log("addon", addon);
-      }
       if (referenceValuePresent(addon.next_move)) {
         const childCategory = addonData[addon.next_move];
 
@@ -176,13 +173,11 @@ export const performPreflightCheck = (
 ): preflightCheck => {
   let errorList: string[] = [];
   let failedAddonCatIds: string[] = [];
-  let count = 0;
   if (mapOfAddonCategories) {
     for (const [_, addonCat] of Object.entries(mapOfAddonCategories)) {
       /**
        * Record max depth of subtree against each addonCat
        */
-
       markMaxDepth(
         storeId,
         mapOfAddonCategories,
@@ -197,30 +192,22 @@ export const performPreflightCheck = (
   /**
    * every addonCat now has a ._maxSubtreeDepth
    */
+
   for (const itemCategory of itemCategoriesList) {
     for (const itemSubcategory of itemCategory.subcat) {
       for (const item of itemSubcategory.item) {
-        if (item.name.length > 120) {
-          console.log("item", item);
-        }
-        if (item.offer === "BOGOF" || item.offer === "BOGOH") {
-          logPreflightFailure(
-            `${errorPrefix} storeId: ${storeId} -  item id: ${item.id} (${item.name}) ${item.offer} detected this item.`,
-            errorList
-          );
-        }
         if (referenceValuePresent(item.item_addon_cat)) {
           const rootAddonCat = mapOfAddonCategories
             ? mapOfAddonCategories[item.item_addon_cat]
             : null;
           if (!rootAddonCat) {
             logPreflightFailure(
-              `${errorPrefix} storeId: ${storeId} - item id: ${item.id} specified invalid item.item_addon_cat of: ` +
+              `${errorPrefix} storeId: ${storeId} - item id: ${item.id} (${item.name}) specified invalid item.item_addon_cat of: ` +
                 item.item_addon_cat,
               errorList
             );
             addonCategoryIds(item.item_addon_cat, failedAddonCatIds);
-          } else if (rootAddonCat._maxSubtreeDepth! > 2) {
+          } else if (rootAddonCat._maxSubtreeDepth! > 6) {
             logPreflightFailure(
               `${errorPrefix} storeId: ${storeId} - depth of addon tree for '${item.name}' id:${item.id} is : ${rootAddonCat._maxSubtreeDepth}`,
               errorList
@@ -237,12 +224,12 @@ export const performPreflightCheck = (
 
 export const removeFailedItems = (
   categories: ItemCategory[],
-  failedAddonCatIds: string[]
+  addonCatIds: string[]
 ): ItemCategory[] => {
   for (let category of categories) {
     for (let subcategory of category.subcat) {
       subcategory.item = subcategory.item.filter((item) => {
-        return !failedAddonCatIds.includes(item.item_addon_cat);
+        return !addonCatIds.includes(item.item_addon_cat);
       });
     }
   }
@@ -251,9 +238,9 @@ export const removeFailedItems = (
 
 export const removeFailedAddonsCats = (
   addons: AddonCategoryMap,
-  failedAddonCatIds: string[]
+  addonCatIds: string[]
 ) => {
-  failedAddonCatIds.map((item) => {
+  addonCatIds.map((item) => {
     delete addons[item];
   });
   return addons;

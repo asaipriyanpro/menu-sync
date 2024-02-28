@@ -354,6 +354,10 @@ export interface OrderItem {
    * Split vat value from price.
    */
   vat_split?: VatSplit;
+  /**
+   * Category name of the item.
+   */
+  category_name?: string;
 }
 
 export interface VAT {
@@ -414,11 +418,19 @@ export interface NutritionInfo {
   sugar: NutritionType;
   protein: NutritionType;
   salt: NutritionType;
-  allergens: NutritionType;
+  allergens?: string[];
+  additive?: string[];
+  dietary_restriction?: string;
+  spiciness?: string;
 }
 export interface NutritionType {
   value: number;
   unit: string;
+}
+
+export interface Schedule {
+  start_time: string;
+  end_time: string;
 }
 /**
  *
@@ -435,6 +447,8 @@ export interface MenuCategory {
   id: string;
   name: string;
   availability: MenuAvailability;
+  name_localized?: string;
+  schedule?: Schedule;
   fulfillment_modes: MenuFulfillmentModes;
   show_online: boolean;
   tax_percentage?: number;
@@ -445,6 +459,8 @@ export interface MenuSubCategory {
   id: string;
   name: string;
   description: string;
+  name_localized?: string;
+  schedule?: Schedule;
   availability: MenuAvailability;
   fulfillment_modes: MenuFulfillmentModes;
   show_online: boolean;
@@ -459,6 +475,8 @@ export interface MenuItem {
   name: string;
   description: string;
   availability: MenuAvailability;
+  name_localized?: string;
+  schedule?: Schedule;
   fulfillment_modes: MenuFulfillmentModes;
   dietary_labels?: MenuDietaryLabels;
   nutrition_info?: NutritionInfo;
@@ -470,12 +488,17 @@ export interface MenuItem {
   price: number;
   modifier_groups: string[];
   number_of_servings?: number;
+  contains_alcohol?: boolean;
+  contains_tobacco?: boolean;
 }
 
 export interface MenuModifierGroup {
   id: string;
   name: string;
   description: string;
+  name_localized?: string;
+  min_permitted?: number;
+  max_permitted?: number;
   modifiers: string[];
 }
 
@@ -483,6 +506,7 @@ export interface MenuModifier {
   id: string;
   name: string;
   price: number;
+  name_localized?: string;
   offer?: "BOGOF" | "BOGOH" | "NONE";
   dietary_labels?: MenuDietaryLabels;
   nutrition_info?: NutritionInfo;
@@ -491,6 +515,8 @@ export interface MenuModifier {
   is_tax_included: boolean;
   min_permitted?: number;
   max_permitted?: number;
+  contains_alcohol?: boolean;
+  contains_tobacco?: boolean;
   modifier_groups?: string[];
 }
 
@@ -507,4 +533,17 @@ export type WeekOpenings = { [key: string]: OpeningPeriod[] };
 export interface OpenHoursEntity {
   COLLECTION?: WeekOpenings;
   DELIVERY?: WeekOpenings;
+}
+
+export interface ScheduleDetails {
+  table: "category_scheduler" | "subcat_scheduler" | "item_scheduler";
+  condition: "category_id" | "subcat_id" | "item_id";
+  stateField: "category" | "subcat" | "item";
+  menuField: "categories" | "subcategories" | "items";
+}
+
+export interface ScheduleEntityInterface {
+  category: ScheduleDetails;
+  subcat: ScheduleDetails;
+  item: ScheduleDetails;
 }

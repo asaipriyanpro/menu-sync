@@ -68,16 +68,18 @@ const getCategories = (
 ): DeliverooCategories[] => {
   return categories
     .map((category) =>
-      category.subcat.map<DeliverooCategories>((subcat) => ({
-        id: toId(subcat.id, "fh_category"),
-        name: {
-          en: subcat.name,
-        },
-        description: {
-          en: subcat.description,
-        },
-        item_ids: subcat.item.map((item) => toId(item.id, "fh_item")),
-      }))
+      category.subcat.map<DeliverooCategories>((subcat) => {
+        return {
+          id: toId(subcat.id, "fh_category"),
+          name: {
+            en: subcat.name,
+          },
+          description: {
+            en: subcat.description,
+          },
+          item_ids: subcat.item.map((item) => toId(item.id, "fh_item")),
+        };
+      })
     )
     .flat();
 };
@@ -92,6 +94,13 @@ const getItems = (
 
   return [
     items.map((item): DeliverooItems => {
+      if (item.name.length > 110) {
+        console.log(item);
+      }
+      if (item.name.length < 2) {
+        console.log(item);
+      }
+
       return {
         id: toId(item.id, "fh_item"),
         name: {
@@ -128,6 +137,12 @@ const getItems = (
       .map(({ addon }) =>
         addon
           .map((addon): DeliverooItems => {
+            if (addon.name.length > 120) {
+              console.log(addon);
+            }
+            if (addon.name.length < 2) {
+              console.log(addon);
+            }
             return {
               id: toId(addon.id, "fh_addon"),
               name: { en: addon.name },

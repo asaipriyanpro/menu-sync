@@ -40,7 +40,7 @@ export interface FoodHubCategory {
   is_vat_included: string;
   is_schedule: number;
   region_tax_id: string | null;
-  schedule: [];
+  schedule: Schedule[];
   subcat: FoodHubSubCategory[];
 }
 export interface FoodHubSubCategory {
@@ -93,7 +93,7 @@ export interface FoodHubSubCategory {
   is_schedule: number;
   region_tax_id: string | null;
   is_image_approved: string;
-  schedule: [];
+  schedule: Schedule[];
   item: FoodHubItem[];
 }
 export interface FoodHubItem {
@@ -105,7 +105,7 @@ export interface FoodHubItem {
   information: string | null;
   price: number;
   subcat: number;
-  image: string;
+  image?: string | null;
   aws_image: string;
   image_backup: string;
   addon_type: string;
@@ -118,7 +118,7 @@ export interface FoodHubItem {
   sunday: number;
   delivery: number;
   collection: number;
-  show_online: number;
+  show_online?: number;
   background_color: string;
   font_color: string;
   pos: number;
@@ -137,28 +137,28 @@ export interface FoodHubItem {
   modified_page: string;
   vat: string;
   exclude_free: number;
-  second_language_name: string;
+  second_language_name?: string;
   second_language_description: string;
   printer: number;
   section: number;
   is_print_label: string;
   tax_percentage: number;
-  is_vat_included: string;
+  is_vat_included?: string;
   food_type: string;
   sections: null;
   half_and_half_status: number;
   half_and_half_charges: null;
   is_schedule: number;
-  region_tax_id: null;
+  region_tax_id?: number | null;
   is_image_approved: string;
-  schedule: [];
-
+  schedule: Schedule[];
   // New
   partner_id: string;
   suitable_diet: string;
   next_moves: string[];
   nutrition: string;
   number_of_servings: number;
+  allergen: string;
 }
 
 export interface FoodhubAddonCategoryMapCategory {
@@ -177,11 +177,11 @@ export interface FoodhubAddonCategoryMapCategory {
   updated_at: string;
   item_id: number | null;
   pos: number;
+  minimum: number;
+  maximum: number;
   free_count: number;
   region_tax_id: number | null;
   next_moves: string[];
-  minimum: number;
-  maximum: number;
 }
 
 export interface FoodhubAddon {
@@ -200,18 +200,21 @@ export interface FoodhubAddon {
   created_date: string;
   user: string;
   sys: string;
-  show_online: number;
+  show_online?: number;
   show_on_receipt: number;
-  second_language_name: string;
+  second_language_name?: string;
   updated_at: string;
   is_print_label: string;
-  region_tax_id: string | null;
+  region_tax_id?: number | null;
   tax_percentage: number;
-  is_vat_included: string;
+  is_vat_included?: string;
   //new
   suitable_diet: string;
   next_moves: string[];
   nutrition: string;
+  minimum: number;
+  maximum: number;
+  allergen: string;
 }
 
 // export interface FoodhubAddonCategoryMap {
@@ -256,7 +259,7 @@ export interface CreateOrder {
   /**
    * Type of Fulfillment required
    */
-  fulfillment_type: "DELIVERY" | "COLLECTION";
+  fulfillment_type: "DELIVERY" | "COLLECTION" | "INSTORE";
   /**
    * List of items on the order
    */
@@ -406,6 +409,10 @@ export interface CreateOrderItem {
    * The total quantity requested for this item
    */
   quantity: number;
+  /**
+   * The category name for this item
+   */
+  category_name?: string;
 }
 
 /**
@@ -428,6 +435,14 @@ export interface CreateOrderItemAddon {
    * The total quantity requested for this addon
    */
   quantity: number;
+  /**
+   * Modifier group name each addons
+   */
+  modifier_group_name?: string;
+  /**
+   * Nested addons
+   */
+  addons?: CreateOrderItemAddon[];
 }
 
 export interface CreateOrderPayment {
@@ -530,4 +545,54 @@ export interface ItemDetails {
   sections: string;
   itemId: string;
   secondLanguageName: string;
+}
+
+export interface Schedule {
+  id: number;
+  category_id: number;
+  start_date: string;
+  end_date: string;
+  start_time: string;
+  end_time: string;
+  repeat_type: string;
+  status: number;
+}
+
+export interface RefundRequest {
+  customer_id: number;
+  order_info_id: number;
+  amount: number;
+  wallet_amount: number;
+  card_amount: number;
+  refund_source_id: number;
+  refund_status_id: number;
+  requested_by: string;
+  device: string;
+  reason: string;
+  provider: string;
+  host: string;
+  merchant_id: number;
+  destination: number;
+  source_type: string;
+  created_at: string;
+}
+
+export interface WalletRefundRequest extends RefundRequest {
+  product_id: number;
+  refund_request_id: number;
+  created_at: string;
+}
+export interface MenuUpdate {
+  store_id: number;
+  host: string;
+  entity_id: number;
+  entity_name: string;
+  action: "enable" | "disable";
+  identifier: "OUT_OF_STOCK" | "MENU_UPDATE";
+  entity_action: "create" | "update" | "delete";
+}
+
+export interface AllergenInfo {
+  allergenType: "ALCOHOL" | "TOBACCO";
+  levelOfContainment: "CONTAINS" | "MAY_CONTAIN";
 }

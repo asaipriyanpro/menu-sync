@@ -23,38 +23,34 @@ export const resolveNextMoves = (
   addonMap: FoodhubAddonCategoryMapV1
 ): string[] => {
   const ids = [];
-  const nextMoveIds = [];
-
+  const nextMoveIds: string[] = [];
   do {
-    try {
-      if (addonMap[groupId]?.category?.next_move) {
-        if (
-          nextMoveIds.includes(addonMap[groupId].category.next_move.toString())
-        ) {
-          console.log("Category loop", nextMoveIds);
-          break;
-        }
-
-        nextMoveIds.push(addonMap[groupId]?.category?.next_move);
+    if (addonMap[groupId]?.category?.next_move) {
+      if (
+        nextMoveIds.includes(addonMap[groupId].category.next_move.toString())
+      ) {
+        console.log("error");
+        break;
+      }
+      try {
         ids.push(
           checkFalsyValues(
             addonMap[addonMap[groupId].category.next_move].category.partner_id
           )
-            ? `mod-group:${addonMap[groupId]?.category.next_move}`
+            ? `mod-group:${addonMap[groupId].category.next_move}`
             : String(
-                addonMap[addonMap[groupId]?.category.next_move]?.category
+                addonMap[addonMap[groupId].category.next_move].category
                   .partner_id
               )
         );
+      } catch (err) {
+        console.log("error");
       }
-    } catch (err) {
-      console.log(addonMap[groupId]?.category?.next_move, err);
     }
   } while (
     addonMap[groupId] &&
-    (groupId = addonMap[groupId]?.category.next_move)
+    (groupId = addonMap[groupId].category.next_move)
   );
-
   return ids;
 };
 
@@ -115,6 +111,13 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
           ? `category:${category.id}`
           : String(category.partner_id),
         name: category.name,
+        name_localized: category.second_language_name ?? undefined,
+        schedule: category.schedule?.length
+          ? {
+              start_time: category.schedule[0].start_time ?? "",
+              end_time: category.schedule[0].end_time ?? "",
+            }
+          : undefined,
         availability: getAvailability(category),
         fulfillment_modes: getFufillmentModes(
           category.collection,
@@ -146,12 +149,19 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
               ? `subcat:${subcat.id}`
               : String(subcat.partner_id),
             name: subcat.name,
-            description: subcat.description,
+            description: subcat.description ?? "",
             availability: getAvailability(subcat),
+            name_localized: subcat.second_language_name ?? undefined,
             fulfillment_modes: getFufillmentModes(
               subcat.collection,
               subcat.delivery
             ),
+            schedule: subcat.schedule?.length
+              ? {
+                  start_time: subcat.schedule[0].start_time ?? "",
+                  end_time: subcat.schedule[0].end_time ?? "",
+                }
+              : undefined,
             show_online: !!subcat.show_online,
             tax_percentage:
               subcat.tax_percentage !== null
@@ -180,13 +190,24 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                   ? `item:${item.id}`
                   : String(item.partner_id),
                 name: item.name,
-                description: item.description,
+                description: item.description ?? "",
                 availability: getAvailability(item),
+                name_localized: item.second_language_name ?? undefined,
                 fulfillment_modes: getFufillmentModes(
                   item.collection,
                   item.delivery
                 ),
-                offer: item.offer === "NONE" ? undefined : item.offer,
+
+                schedule: item.schedule?.length
+                  ? {
+                      start_time: item.schedule[0].start_time ?? "",
+                      end_time: item.schedule[0].end_time ?? "",
+                    }
+                  : undefined,
+                offer:
+                  item.offer && ["BOGOF", "BOGOH"].includes(item.offer)
+                    ? item.offer
+                    : undefined,
                 dietary_labels: item.suitable_diet
                   ? JSON.parse(item.suitable_diet)
                   : undefined,
@@ -208,22 +229,21 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                       )
                     : Number((item.price * 100).toFixed(2)), //remove vat value to get the original price.
                 // Map all groups to modifier group-id
-                modifier_groups:
-                  item.item_addon_cat != "0"
-                    ? [
-                        checkFalsyValues(
-                          addons[item.item_addon_cat]?.category.partner_id
-                        )
-                          ? `mod-group:${item.item_addon_cat}`
-                          : String(
-                              addons[item.item_addon_cat]?.category.partner_id
-                            ),
+                modifier_groups: !!Number(item.item_addon_cat)
+                  ? [
+                      checkFalsyValues(
+                        addons[item.item_addon_cat]?.category.partner_id
+                      )
+                        ? `mod-group:${item.item_addon_cat}`
+                        : String(
+                            addons[item.item_addon_cat]?.category.partner_id
+                          ),
 
-                        ...resolveNextMoves(item.item_addon_cat, addons).map(
-                          (id) => String(id)
-                        ),
-                      ]
-                    : [],
+                      ...resolveNextMoves(item.item_addon_cat, addons).map(
+                        (id) => String(id)
+                      ),
+                    ]
+                  : [],
               }))
               .flat()
           )
@@ -235,14 +255,16 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
     (addons &&
       Object.keys(addons).map((categoryId) => {
         const catAddons = addons[categoryId].addon;
-        const minimum = addons[categoryId].category.minimum;
-        const maximum = addons[categoryId].category.maximum;
+
         return {
           id: checkFalsyValues(addons[categoryId].category.partner_id)
             ? `mod-group:${categoryId}`
             : String(addons[categoryId].category.partner_id),
           name: addons[categoryId].category.name,
-          description: addons[categoryId].category.description,
+          name_localized:
+            addons[categoryId].category.second_language_name ?? undefined,
+          description: addons[categoryId].category.description ?? "",
+          //addon.length > 0 && addon[0].type === 'radio' ? 1 : 0,
           min_permitted:
             catAddons.length > 0 && catAddons[0].type.toLowerCase() === "radio"
               ? 1
@@ -250,11 +272,11 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
           max_permitted:
             catAddons.length > 0 && catAddons[0].type.toLowerCase() === "multi"
               ? 0
-              : undefined,
+              : 1,
           modifiers:
             addons[categoryId].addon.map((item) =>
               checkFalsyValues(item.partner_id)
-                ? `mod:${item.id}`
+                ? `modifier:${item.id}`
                 : String(item.partner_id)
             ) || [],
         };
@@ -268,9 +290,10 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
           return addon
             .map((don) => ({
               id: checkFalsyValues(don.partner_id)
-                ? `mod:${don.id}`
+                ? `modifier:${don.id}`
                 : String(don.partner_id),
               name: don.name,
+              name_localized: don.second_language_name ?? undefined,
               price:
                 don.tax_percentage && don.tax_percentage > 0
                   ? getOriginalPriceExludingVat(
@@ -278,7 +301,10 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                       don.tax_percentage / 100
                     )
                   : Number((parseFloat(don.price) * 100).toFixed(2)),
-              offer: don.offer,
+              offer:
+                don.offer && ["BOGOF", "BOGOH"].includes(don.offer)
+                  ? don.offer
+                  : undefined,
               show_online: Boolean(don.show_online),
               tax_percentage:
                 don.tax_percentage !== null
@@ -286,7 +312,7 @@ const transform: Schema<MenuEntity, FoodHubMenuV1> = {
                   : undefined,
               is_tax_included: !(don.tax_percentage && don.tax_percentage > 0),
               min_permitted: don.type.toLowerCase() === "radio" ? 1 : 0,
-              max_permitted: don.type.toLowerCase() === "multi" ? 0 : undefined,
+              max_permitted: don.type.toLowerCase() === "multi" ? 0 : 1,
               dietary_labels: don.suitable_diet
                 ? JSON.parse(don.suitable_diet)
                 : undefined,
